@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8" />
+  <title>Supabase Auth Example</title>
+</head>
+<body>
+  <h1>Login with Supabase</h1>
+
+  <form id="login-form">
+    <input type="email" id="email" placeholder="Email" required />
+    <br />
+    <input type="password" id="password" placeholder="Password" required />
+    <br />
+    <button type="submit">Login</button>
+  </form>
+
+  <hr />
+  <h2>Or</h2>
+<button id="google-login">Login with Google</button>
+
+
+  <h2>Sign Up</h2>
+  <form id="signup-form">
+    <input type="email" id="signup-email" placeholder="Email" required />
+    <br />
+    <input type="password" id="signup-password" placeholder="Password" required />
+    <br />
+    <button type="submit">Sign Up</button>
+  </form>
+
+  <script type="module">
+    import { supabase } from './supabaseClient.js';
+
+    // Login form
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        alert('Login failed: ' + error.message);
+      } else {
+        alert('Login successful!');
+        console.log('User:', data.user);
+      }
+    });
+    document.getElementById('google-login').addEventListener('click', async () => {
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+  });
+
+  if (error) {
+    alert('Google login failed: ' + error.message);
+    console.error('OAuth error:', error);
+  }
+});
+supabase.auth.getSession().then(({ data: { session } }) => {
+  if (session) {
+    alert(`Already logged in as ${session.user.email}`);
+    console.log('Session:', session);
+  }
+});
+
+
+    // Signup form
+    document.getElementById('signup-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById('signup-email').value;
+      const password = document.getElementById('signup-password').value;
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+
+      if (error) {
+        alert('Signup failed: ' + error.message);
+      } else {
+        alert('Signup successful! Please check your email to confirm.');
+        console.log('Signup data:', data);
+      }
+    });
+    
+  </script>
+</body>
+</html>
