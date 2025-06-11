@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>Supabase Auth Example</title>
@@ -15,11 +15,13 @@
     <button type="submit">Login</button>
   </form>
 
+  <p><a href="#" id="forgot-password">Forgot Password?</a></p>
+
   <hr />
   <h2>Or</h2>
-<button id="google-login">Login with Google</button>
+  <button id="google-login">Login with Google</button>
 
-
+  <hr />
   <h2>Sign Up</h2>
   <form id="signup-form">
     <input type="email" id="signup-email" placeholder="Email" required />
@@ -32,63 +34,65 @@
   <script type="module">
     import { supabase } from './supabaseClient.js';
 
-    // Login form
+    // Login
     document.getElementById('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
 
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
 
       if (error) {
         alert('Login failed: ' + error.message);
       } else {
-        alert('Login successful!');
-        console.log('User:', data.user);
+        window.location.href = 'after-login.html';
       }
     });
-    document.getElementById('google-login').addEventListener('click', async () => {
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
-  });
 
-  if (error) {
-    alert('Google login failed: ' + error.message);
-    console.error('OAuth error:', error);
-  }
-});
-supabase.auth.getSession().then(({ data: { session } }) => {
-  if (session) {
-    alert(`Already logged in as ${session.user.email}`);
-    console.log('Session:', session);
-  }
-});
-
-
-    // Signup form
+    // Sign Up
     document.getElementById('signup-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-
       const email = document.getElementById('signup-email').value;
       const password = document.getElementById('signup-password').value;
 
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-      });
+      const { error } = await supabase.auth.signUp({ email, password });
 
       if (error) {
         alert('Signup failed: ' + error.message);
       } else {
         alert('Signup successful! Please check your email to confirm.');
-        console.log('Signup data:', data);
       }
     });
-    
+
+    // Google Login
+    document.getElementById('google-login').addEventListener('click', async () => {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: 'http://127.0.0.1:5500/after-login.html'
+        }
+      });
+
+      if (error) {
+        alert('Google login failed: ' + error.message);
+      }
+    });
+
+    // Forgot Password
+    document.getElementById('forgot-password').addEventListener('click', async (e) => {
+      e.preventDefault();
+      const email = prompt('Enter your email to reset your password:');
+      if (email) {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: 'http://127.0.0.1:5500/reset-password.html',
+        });
+        if (error) {
+          alert('Error sending reset email: ' + error.message);
+        } else {
+          alert('Password reset email sent! Check your inbox.');
+        }
+      }
+    });
   </script>
 </body>
 </html>

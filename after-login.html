@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>After Login</title>
+</head>
+<body>
+  <h1>Welcome! You are logged in.</h1>
+  <button id="logout">Logout</button>
+
+  <script type="module">
+    import { supabase } from './supabaseClient.js';
+
+    // Logout button sends user back to login page
+    document.getElementById('logout').addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      window.location.href = 'http://127.0.0.1:5500/index.html';
+    });
+
+    // Optionally, display logged in user's email
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) {
+        const p = document.createElement('p');
+        p.textContent = `Logged in as: ${data.user.email}`;
+        document.body.appendChild(p);
+      }
+    });
+  </script>
+</body>
+</html>
